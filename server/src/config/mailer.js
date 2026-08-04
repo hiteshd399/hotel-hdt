@@ -1,10 +1,12 @@
-import { TransactionalEmailsApi, TransactionalEmailsApiApiKeys } from '@getbrevo/brevo'
+import * as brevoPkg from '@getbrevo/brevo'
 import dotenv from 'dotenv'
 
 dotenv.config()
 
-const apiInstance = new TransactionalEmailsApi()
-apiInstance.setApiKey(TransactionalEmailsApiApiKeys.apiKey, process.env.BREVO_API_KEY)
+const brevo = brevoPkg.default || brevoPkg
+
+const apiInstance = new brevo.TransactionalEmailsApi()
+apiInstance.setApiKey(brevo.TransactionalEmailsApiApiKeys.apiKey, process.env.BREVO_API_KEY)
 
 /**
  * Send an email using Brevo.
