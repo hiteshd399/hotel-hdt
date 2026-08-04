@@ -1,0 +1,167 @@
+// Prisma schema for Hotel HDT
+// Using SQLite for easy local dev — switch DATABASE_URL to PostgreSQL/MongoDB in production.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+// ===================== User =====================
+model User {
+  id        String   @id @default(cuid())
+  name      String
+  email     String   @unique
+  password  String
+  phone     String?
+  role      String   @default("customer") // "admin" | "customer"
+  avatar    String?
+  address   String?
+  city      String?
+  country   String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  bookings  Booking[]
+  reviews   Review[]
+  contacts  Contact[]
+}
+
+// ===================== Room =====================
+model Room {
+  id          String   @id @default(cuid())
+  name        String
+  slug        String   @unique
+  category    String   // Deluxe | Superior | Executive | Suite | Presidential Suite
+  description String
+  price       Float
+  guests      Int
+  beds        String
+  bedType     String?
+  size        String?
+  bathroom    String
+  tv          Boolean  @default(true)
+  wifi        Boolean  @default(true)
+  ac          Boolean  @default(true)
+  minibar     Boolean  @default(false)
+  view        String?
+  images      String   // JSON string array of image URLs
+  features    String   // JSON string array
+  available   Boolean  @default(true)
+  count       Int      @default(1) // total inventory of this room type
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  bookings Booking[]
+  reviews  Review[]
+}
+
+// ===================== Booking =====================
+model Booking {
+  id             String   @id @default(cuid())
+  user           User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId         String
+  room           Room     @relation(fields: [roomId], references: [id], onDelete: Cascade)
+  roomId         String
+  checkIn        DateTime
+  checkOut       DateTime
+  adults         Int      @default(1)
+  children       Int      @default(0)
+  nights         Int
+  guestsTotal    Int
+  pricePerNight  Float
+  totalPrice     Float
+  specialRequest String?
+  status         String   @default("pending") // pending | approved | cancelled | completed
+  paymentStatus  String   @default("unpaid")   // unpaid | paid
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  @@index([userId])
+  @@index([roomId])
+  @@index([status])
+}
+
+// ===================== Review =====================
+model Review {
+  id        String   @id @default(cuid())
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId    String
+  room      Room?    @relation(fields: [roomId], references: [id], onDelete: SetNull)
+  roomId    String?
+  rating    Int      // 1-5
+  comment   String
+  approved  Boolean  @default(false)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([roomId])
+  @@index([userId])
+}
+
+// ===================== Gallery =====================
+model Gallery {
+  id        String   @id @default(cuid())
+  title     String
+  category  String   @default("hotel") // hotel | rooms | restaurant | events | pool
+  imageUrl  String
+  createdAt DateTime @default(now())
+
+  @@index([category])
+}
+
+// ===================== Restaurant (Menu Item) =====================
+model Restaurant {
+  id        String   @id @default(cuid())
+  name      String
+  description String
+  price     Float
+  category  String   // breakfast | lunch | dinner | drinks | desserts | special
+  image     String?
+  available Boolean  @default(true)
+  createdAt DateTime @default(now())
+
+  @@index([category])
+}
+
+// ===================== Offer =====================
+model Offer {
+  id          String   @id @default(cuid())
+  title       String
+  description String
+  discount    String   // e.g. "25%"
+  image       String?
+  validFrom   DateTime
+  validTo     DateTime
+  active      Boolean  @default(true)
+  createdAt   DateTime @default(now())
+}
+
+// ===================== Event =====================
+model Event {
+  id          String   @id @default(cuid())
+  title       String
+  description String
+  date        DateTime
+  location    String
+  image       String?
+  capacity    Int      @default(100)
+  createdAt   DateTime @default(now())
+}
+
+// ===================== Contact =====================
+model Contact {
+  id        String   @id @default(cuid())
+  user      User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
+  userId    String?
+  name      String
+  email     String
+  phone     String?
+  subject   String
+  message   String
+  resolved  Boolean  @default(false)
+  createdAt DateTime @default(now())
+}
