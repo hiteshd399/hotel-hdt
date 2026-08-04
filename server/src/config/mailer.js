@@ -3,10 +3,28 @@ import dotenv from 'dotenv'
 
 dotenv.config()
 
-const brevo = brevoPkg.default || brevoPkg
+// Debug: log the actual shape of the package so we can see what's available
+console.log('[BREVO DEBUG] top-level keys:', Object.keys(brevoPkg))
+console.log('[BREVO DEBUG] has default?', 'default' in brevoPkg)
+if (brevoPkg.default) {
+  console.log('[BREVO DEBUG] default keys:', Object.keys(brevoPkg.default))
+}
 
-const apiInstance = new brevo.TransactionalEmailsApi()
-apiInstance.setApiKey(brevo.TransactionalEmailsApiApiKeys.apiKey, process.env.BREVO_API_KEY)
+// Try to locate TransactionalEmailsApi wherever it actually lives
+const TransactionalEmailsApi =
+  brevoPkg.TransactionalEmailsApi ||
+  brevoPkg.default?.TransactionalEmailsApi
+
+const TransactionalEmailsApiApiKeys =
+  brevoPkg.TransactionalEmailsApiApiKeys ||
+  brevoPkg.default?.TransactionalEmailsApiApiKeys
+
+if (!TransactionalEmailsApi) {
+  console.error('[BREVO DEBUG] Could not find TransactionalEmailsApi anywhere in the module')
+}
+
+const apiInstance = new TransactionalEmailsApi()
+apiInstance.setApiKey(TransactionalEmailsApiApiKeys.apiKey, process.env.BREVO_API_KEY)
 
 /**
  * Send an email using Brevo.
