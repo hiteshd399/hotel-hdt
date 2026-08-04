@@ -1,30 +1,11 @@
-import * as brevoPkg from '@getbrevo/brevo'
+import { BrevoClient } from '@getbrevo/brevo'
 import dotenv from 'dotenv'
 
 dotenv.config()
 
-// Debug: log the actual shape of the package so we can see what's available
-console.log('[BREVO DEBUG] top-level keys:', Object.keys(brevoPkg))
-console.log('[BREVO DEBUG] has default?', 'default' in brevoPkg)
-if (brevoPkg.default) {
-  console.log('[BREVO DEBUG] default keys:', Object.keys(brevoPkg.default))
-}
-
-// Try to locate TransactionalEmailsApi wherever it actually lives
-const TransactionalEmailsApi =
-  brevoPkg.TransactionalEmailsApi ||
-  brevoPkg.default?.TransactionalEmailsApi
-
-const TransactionalEmailsApiApiKeys =
-  brevoPkg.TransactionalEmailsApiApiKeys ||
-  brevoPkg.default?.TransactionalEmailsApiApiKeys
-
-if (!TransactionalEmailsApi) {
-  console.error('[BREVO DEBUG] Could not find TransactionalEmailsApi anywhere in the module')
-}
-
-const apiInstance = new TransactionalEmailsApi()
-apiInstance.setApiKey(TransactionalEmailsApiApiKeys.apiKey, process.env.BREVO_API_KEY)
+const brevo = new BrevoClient({
+  apiKey: process.env.BREVO_API_KEY,
+})
 
 /**
  * Send an email using Brevo.
@@ -32,14 +13,14 @@ apiInstance.setApiKey(TransactionalEmailsApiApiKeys.apiKey, process.env.BREVO_AP
  */
 export async function sendEmail({ to, subject, html, text }) {
   try {
-    const info = await apiInstance.sendTransacEmail({
+    const info = await brevo.transactionalEmails.sendTransacEmail({
       sender: { name: 'Hotel HDT', email: 'hiteshdeuba@gmail.com' },
       to: [{ email: to }],
       subject,
       htmlContent: html,
       textContent: text || subject,
     })
-    console.log(`[EMAIL] Sent to ${to}: ${info.body?.messageId}`)
+    console.log(`[EMAIL] Sent to ${to}`)
     return info
   } catch (err) {
     console.error('[EMAIL ERROR]', err.message)
