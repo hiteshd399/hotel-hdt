@@ -1,24 +1,26 @@
-import { Resend } from 'resend'
+import * as brevo from '@getbrevo/brevo'
 import dotenv from 'dotenv'
 
 dotenv.config()
 
-const resend = new Resend(process.env.RESEND_API_KEY)
+const apiInstance = new brevo.TransactionalEmailsApi()
+apiInstance.setApiKey(brevo.TransactionalEmailsApiApiKeys.apiKey, process.env.BREVO_API_KEY)
 
 /**
- * Send an email using Resend.
+ * Send an email using Brevo.
  * @param {Object} opts { to, subject, html, text }
  */
 export async function sendEmail({ to, subject, html, text }) {
   try {
-    const info = await resend.emails.send({
-      from: `Hotel HDT <onboarding@resend.dev>`,
-      to,
-      subject,
-      html,
-      text: text || subject,
-    })
-    console.log(`[EMAIL] Sent to ${to}: ${info.data?.id}`)
+    const email = new brevo.SendSmtpEmail()
+    email.sender = { name: 'Hotel HDT', email: 'hiteshdeuba@gmail.com' }
+    email.to = [{ email: to }]
+    email.subject = subject
+    email.htmlContent = html
+    email.textContent = text || subject
+
+    const info = await apiInstance.sendTransacEmail(email)
+    console.log(`[EMAIL] Sent to ${to}: ${info.body?.messageId}`)
     return info
   } catch (err) {
     console.error('[EMAIL ERROR]', err.message)
