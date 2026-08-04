@@ -1,10 +1,10 @@
-import brevo from '@getbrevo/brevo'
+import { TransactionalEmailsApi, TransactionalEmailsApiApiKeys, SendSmtpEmail } from '@getbrevo/brevo'
 import dotenv from 'dotenv'
 
 dotenv.config()
 
-const apiInstance = new brevo.TransactionalEmailsApi()
-apiInstance.setApiKey(brevo.TransactionalEmailsApiApiKeys.apiKey, process.env.BREVO_API_KEY)
+const apiInstance = new TransactionalEmailsApi()
+apiInstance.setApiKey(TransactionalEmailsApiApiKeys.apiKey, process.env.BREVO_API_KEY)
 
 /**
  * Send an email using Brevo.
@@ -12,7 +12,7 @@ apiInstance.setApiKey(brevo.TransactionalEmailsApiApiKeys.apiKey, process.env.BR
  */
 export async function sendEmail({ to, subject, html, text }) {
   try {
-    const email = new brevo.SendSmtpEmail()
+    const email = new SendSmtpEmail()
     email.sender = { name: 'Hotel HDT', email: 'hiteshdeuba@gmail.com' }
     email.to = [{ email: to }]
     email.subject = subject
