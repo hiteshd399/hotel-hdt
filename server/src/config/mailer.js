@@ -1,33 +1,24 @@
-import nodemailer from 'nodemailer'
+import { Resend } from 'resend'
 import dotenv from 'dotenv'
 
 dotenv.config()
 
-// Reusable SMTP transporter (use Gmail App Password in dev)
-const transporter = nodemailer.createTransport({
-  host: process.env.SMTP_HOST,
-  port: Number(process.env.SMTP_PORT) || 587,
-  secure: false,
-  auth: {
-    user: process.env.SMTP_USER,
-    pass: process.env.SMTP_PASS,
-  },
-})
+const resend = new Resend(process.env.RESEND_API_KEY)
 
 /**
- * Send an email using the configured SMTP transporter.
+ * Send an email using Resend.
  * @param {Object} opts { to, subject, html, text }
  */
 export async function sendEmail({ to, subject, html, text }) {
   try {
-    const info = await transporter.sendMail({
-      from: `"Hotel HDT" <${process.env.EMAIL_FROM}>`,
+    const info = await resend.emails.send({
+      from: `Hotel HDT <onboarding@resend.dev>`,
       to,
       subject,
       html,
       text: text || subject,
     })
-    console.log(`[EMAIL] Sent to ${to}: ${info.messageId}`)
+    console.log(`[EMAIL] Sent to ${to}: ${info.data?.id}`)
     return info
   } catch (err) {
     console.error('[EMAIL ERROR]', err.message)
